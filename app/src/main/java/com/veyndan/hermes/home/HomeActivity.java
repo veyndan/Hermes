@@ -62,9 +62,15 @@ public class HomeActivity extends BaseActivity {
         recyclerView.setAdapter(adapter);
 
         XKCDService xkcdService = retrofit.create(XKCDService.class);
-        Observable<Comic> latest = xkcdService.num(1);
+        Observable<Comic> latest = xkcdService.latest();
+        Observable<Comic> first = xkcdService.num(1);
 
-        latest.subscribeOn(Schedulers.io())
+        List<Observable<Comic>> comicsObservables = new ArrayList<>();
+        comicsObservables.add(latest);
+        comicsObservables.add(first);
+
+        Observable.merge(comicsObservables)
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Comic>() {
                     @Override
