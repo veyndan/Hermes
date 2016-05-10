@@ -3,7 +3,6 @@ package com.veyndan.hermes.home;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -22,6 +21,7 @@ import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.moshi.MoshiConverterFactory;
 import retrofit2.http.GET;
+import retrofit2.http.Path;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
@@ -45,6 +45,9 @@ public class HomeActivity extends BaseActivity {
     private interface XKCDService {
         @GET("info.0.json")
         Observable<Comic> latest();
+
+        @GET("{num}/info.0.json")
+        Observable<Comic> num(@Path("num") int num);
     }
 
     @Override
@@ -59,7 +62,7 @@ public class HomeActivity extends BaseActivity {
         recyclerView.setAdapter(adapter);
 
         XKCDService xkcdService = retrofit.create(XKCDService.class);
-        Observable<Comic> latest = xkcdService.latest();
+        Observable<Comic> latest = xkcdService.num(1);
 
         latest.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
