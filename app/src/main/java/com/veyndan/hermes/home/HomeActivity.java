@@ -3,6 +3,7 @@ package com.veyndan.hermes.home;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -61,32 +62,45 @@ public class HomeActivity extends BaseActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
 
-        XKCDService xkcdService = retrofit.create(XKCDService.class);
+        final XKCDService xkcdService = retrofit.create(XKCDService.class);
         Observable<Comic> latest = xkcdService.latest();
-        Observable<Comic> first = xkcdService.num(1);
 
-        List<Observable<Comic>> comicsObservables = new ArrayList<>();
-        comicsObservables.add(latest);
-        comicsObservables.add(first);
-
-        Observable.merge(comicsObservables)
-                .subscribeOn(Schedulers.io())
+        latest.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Comic>() {
                     @Override
                     public void onCompleted() {
-
                     }
 
                     @Override
                     public void onError(Throwable e) {
-
                     }
 
                     @Override
                     public void onNext(Comic comic) {
-                        comics.add(comic);
-                        adapter.notifyDataSetChanged();
+                        for (int num = comic.num(); num > 0; num--) {
+                            if (num == 404) continue;
+                            xkcdService.num(num).subscribeOn(Schedulers.newThread())
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribe(new Subscriber<Comic>() {
+                                        @Override
+                                        public void onCompleted() {
+                                            Log.d("_veyndan", "completed");
+                                        }
+
+                                        @Override
+                                        public void onError(Throwable e) {
+                                            Log.e("_veyndan", e.getMessage(), e);
+                                        }
+
+                                        @Override
+                                        public void onNext(Comic comic) {
+                                            Log.d("_veyndan", comic.toString());
+                                            comics.add(comic);
+                                            adapter.notifyDataSetChanged();
+                                        }
+                                    });
+                        }
                     }
                 });
     }
