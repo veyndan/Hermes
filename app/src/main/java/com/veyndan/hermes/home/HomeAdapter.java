@@ -56,6 +56,15 @@ class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.VH> {
         public VH(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
+
+            img.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+                @Override
+                public void onLayoutChange(View v, int left, int top, int right, int bottom,
+                                           int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                    img.removeOnLayoutChangeListener(this);
+                    img.getLayoutParams().height = (int) (img.getWidth() * (9f / 16f));
+                }
+            });
         }
     }
 }
