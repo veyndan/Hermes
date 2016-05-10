@@ -9,12 +9,21 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.veyndan.hermes.Comic;
 import com.veyndan.hermes.R;
+
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.VH> {
+
+    private final List<Comic> comics;
+
+    HomeAdapter(List<Comic> comics) {
+        this.comics = comics;
+    }
 
     @Override
     public VH onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -25,16 +34,17 @@ class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.VH> {
     @Override
     public void onBindViewHolder(VH holder, int position) {
         Context context = holder.itemView.getContext();
+        Comic comic = comics.get(position);
 
-        Glide.with(context).load("https://imgs.xkcd.com//comics//woodpecker.png").into(holder.img);
-        holder.title.setText("Woodpecker");
-        holder.num.setText("#614");
-        holder.alt.setText("If you don't have an extension cord I can get that too.  Because we're friends!  Right?");
+        Glide.with(context).load(comic.getImg()).into(holder.img);
+        holder.title.setText(comic.getTitle());
+        holder.num.setText(String.valueOf(comic.getNum()));
+        holder.alt.setText(comic.getAlt());
     }
 
     @Override
     public int getItemCount() {
-        return 10;
+        return comics.size();
     }
 
     public class VH extends RecyclerView.ViewHolder {
