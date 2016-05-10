@@ -28,7 +28,7 @@ class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.VH> {
 
         Glide.with(context).load("https://imgs.xkcd.com//comics//woodpecker.png").into(holder.img);
         holder.title.setText("Woodpecker");
-        holder.num.setText("614");
+        holder.num.setText("#614");
         holder.alt.setText("If you don't have an extension cord I can get that too.  Because we're friends!  Right?");
     }
 
