@@ -9,19 +9,21 @@ import android.view.MenuItem;
 import com.veyndan.hermes.BaseActivity;
 import com.veyndan.hermes.R;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class HomeActivity extends BaseActivity {
+
+    @BindView(R.id.recycler_view) RecyclerView recyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+        ButterKnife.bind(this);
 
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        if (recyclerView != null) {
-            recyclerView.setLayoutManager(new LinearLayoutManager(this));
-            recyclerView.setAdapter(new HomeAdapter());
-        }
-
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(new HomeAdapter());
     }
 
     @Override
