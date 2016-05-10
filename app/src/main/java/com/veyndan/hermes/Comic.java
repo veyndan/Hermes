@@ -1,35 +1,17 @@
 package com.veyndan.hermes;
 
-public class Comic {
+import com.google.auto.value.AutoValue;
+import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.Moshi;
 
-    private int num;
-    private String alt;
-    private String img;
-    private String title;
+@AutoValue
+public abstract class Comic {
+    public abstract int num();
+    public abstract String alt();
+    public abstract String img();
+    public abstract String title();
 
-    public int getNum() {
-        return num;
-    }
-
-    public String getAlt() {
-        return alt;
-    }
-
-    public String getImg() {
-        return img;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    @Override
-    public String toString() {
-        return "Comic{" +
-                "num=" + num +
-                ", alt='" + alt + '\'' +
-                ", img='" + img + '\'' +
-                ", title='" + title + '\'' +
-                '}';
+    public static JsonAdapter<Comic> jsonAdapter(Moshi moshi) {
+        return new AutoValue_Comic.MoshiJsonAdapter(moshi);
     }
 }

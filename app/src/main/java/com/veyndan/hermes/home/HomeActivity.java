@@ -7,6 +7,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.ryanharter.auto.value.moshi.AutoValueMoshiAdapterFactory;
+import com.squareup.moshi.Moshi;
 import com.veyndan.hermes.BaseActivity;
 import com.veyndan.hermes.Comic;
 import com.veyndan.hermes.R;
@@ -32,13 +34,15 @@ public class HomeActivity extends BaseActivity {
     private final List<Comic> comics = new ArrayList<>();
     private HomeAdapter adapter;
 
-    Retrofit retrofit = new Retrofit.Builder()
+    private Moshi moshi = new Moshi.Builder().add(new AutoValueMoshiAdapterFactory()).build();
+
+    private Retrofit retrofit = new Retrofit.Builder()
             .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-            .addConverterFactory(MoshiConverterFactory.create())
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
             .baseUrl("https://xkcd.com/")
             .build();
 
-    interface XKCDService {
+    private interface XKCDService {
         @GET("info.0.json")
         Observable<Comic> latest();
     }

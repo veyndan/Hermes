@@ -36,10 +36,10 @@ class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.VH> {
         Context context = holder.itemView.getContext();
         Comic comic = comics.get(position);
 
-        Glide.with(context).load(comic.getImg()).into(holder.img);
-        holder.title.setText(comic.getTitle());
-        holder.num.setText(String.valueOf(comic.getNum()));
-        holder.alt.setText(comic.getAlt());
+        Glide.with(context).load(comic.img()).into(holder.img);
+        holder.title.setText(comic.title());
+        holder.num.setText(String.valueOf(comic.num()));
+        holder.alt.setText(comic.alt());
     }
 
     @Override
