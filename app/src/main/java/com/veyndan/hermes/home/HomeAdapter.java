@@ -1,14 +1,18 @@
 package com.veyndan.hermes.home;
 
 import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.veyndan.hermes.R;
 
 class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.VH> {
 
     @Override
     public VH onCreateViewHolder(ViewGroup parent, int viewType) {
-        return null;
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.home_item, parent, false);
+        return new VH(v);
     }
 
     @Override
@@ -18,7 +22,7 @@ class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.VH> {
 
     @Override
     public int getItemCount() {
-        return 0;
+        return 10;
     }
 
     public class VH extends RecyclerView.ViewHolder {
