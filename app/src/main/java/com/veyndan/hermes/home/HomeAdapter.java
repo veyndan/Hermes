@@ -38,7 +38,7 @@ class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.VH> {
 
         Glide.with(context).load(comic.img()).into(holder.img);
         holder.title.setText(comic.title());
-        holder.num.setText(String.valueOf(comic.num()));
+        holder.num.setText(comic.displayNum());
         holder.alt.setText(comic.alt());
     }
 

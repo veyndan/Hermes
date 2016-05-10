@@ -14,4 +14,8 @@ public abstract class Comic {
     public static JsonAdapter<Comic> jsonAdapter(Moshi moshi) {
         return new AutoValue_Comic.MoshiJsonAdapter(moshi);
     }
+
+    public String displayNum() {
+        return "#" + num();
+    }
 }
