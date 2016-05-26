@@ -3,7 +3,6 @@ package com.veyndan.hermes.home;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -24,8 +23,9 @@ import retrofit2.converter.moshi.MoshiConverterFactory;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
 import rx.Observable;
-import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 public class HomeActivity extends BaseActivity {
@@ -63,44 +63,25 @@ public class HomeActivity extends BaseActivity {
         recyclerView.setAdapter(adapter);
 
         final XKCDService xkcdService = retrofit.create(XKCDService.class);
-        Observable<Comic> latest = xkcdService.latest();
 
-        latest.subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<Comic>() {
+        xkcdService.latest()
+                .flatMap(new Func1<Comic, Observable<Comic>>() {
                     @Override
-                    public void onCompleted() {
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                    }
-
-                    @Override
-                    public void onNext(Comic comic) {
-                        for (int num = comic.num(); num > 0; num--) {
-                            if (num == 404) continue;
-                            xkcdService.num(num).subscribeOn(Schedulers.newThread())
-                                    .observeOn(AndroidSchedulers.mainThread())
-                                    .subscribe(new Subscriber<Comic>() {
-                                        @Override
-                                        public void onCompleted() {
-                                            Log.d("_veyndan", "completed");
-                                        }
-
-                                        @Override
-                                        public void onError(Throwable e) {
-                                            Log.e("_veyndan", e.getMessage(), e);
-                                        }
-
-                                        @Override
-                                        public void onNext(Comic comic) {
-                                            Log.d("_veyndan", comic.toString());
-                                            comics.add(comic);
-                                            adapter.notifyDataSetChanged();
-                                        }
-                                    });
+                    public Observable<Comic> call(Comic comic) {
+                        Observable<Comic> observable = Observable.empty();
+                        for (int num = comic.num(); num > comic.num() - 100; num--) {
+                            observable = Observable.concat(observable, xkcdService.num(num));
                         }
+                        return observable;
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Comic>() {
+                    @Override
+                    public void call(Comic comic) {
+                        comics.add(comic);
+                        adapter.notifyDataSetChanged();
                     }
                 });
     }
