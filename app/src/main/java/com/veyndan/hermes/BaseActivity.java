@@ -2,10 +2,11 @@ package com.veyndan.hermes;
 
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
-public class BaseActivity extends AppCompatActivity {
+import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
+
+public class BaseActivity extends RxAppCompatActivity {
 
     @Nullable private Toolbar toolbar;
 

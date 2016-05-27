@@ -65,6 +65,7 @@ public class HomeActivity extends BaseActivity {
         final XKCDService xkcdService = retrofit.create(XKCDService.class);
 
         xkcdService.latest()
+                .compose(this.<Comic>bindToLifecycle())
                 .flatMap(new Func1<Comic, Observable<Comic>>() {
                     @Override
                     public Observable<Comic> call(Comic comic) {
