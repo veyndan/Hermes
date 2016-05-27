@@ -5,7 +5,7 @@ import android.support.annotation.NonNull;
 
 import com.ryanharter.auto.value.moshi.AutoValueMoshiAdapterFactory;
 import com.squareup.moshi.Moshi;
-import com.veyndan.hermes.Comic;
+import com.veyndan.hermes.model.Comic;
 
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
