@@ -9,7 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.veyndan.hermes.model.Comic;
+import com.veyndan.hermes.home.model.Comic;
 import com.veyndan.hermes.R;
 
 import java.util.List;

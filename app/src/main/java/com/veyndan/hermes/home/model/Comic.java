@@ -1,4 +1,4 @@
-package com.veyndan.hermes.model;
+package com.veyndan.hermes.home.model;
 
 import com.google.auto.value.AutoValue;
 import com.squareup.moshi.JsonAdapter;

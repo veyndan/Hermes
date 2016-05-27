@@ -7,7 +7,7 @@ import android.view.MenuItem;
 
 import com.veyndan.hermes.BaseActivity;
 import com.veyndan.hermes.R;
-import com.veyndan.hermes.model.Comic;
+import com.veyndan.hermes.home.model.Comic;
 import com.veyndan.hermes.service.ComicService;
 import com.veyndan.hermes.ui.AutoLayoutManager;
 import com.veyndan.hermes.util.UIUtils;
