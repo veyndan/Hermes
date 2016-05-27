@@ -24,8 +24,6 @@ import retrofit2.http.GET;
 import retrofit2.http.Path;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 public class HomeActivity extends BaseActivity {
@@ -64,24 +62,18 @@ public class HomeActivity extends BaseActivity {
 
         xkcdService.latest()
                 .compose(this.<Comic>bindToLifecycle())
-                .flatMap(new Func1<Comic, Observable<Comic>>() {
-                    @Override
-                    public Observable<Comic> call(Comic comic) {
-                        Observable<Comic> observable = Observable.empty();
-                        for (int num = comic.num(); num > comic.num() - 100; num--) {
-                            observable = observable.concatWith(xkcdService.num(num));
-                        }
-                        return observable;
+                .flatMap(comic -> {
+                    Observable<Comic> observable = Observable.empty();
+                    for (int num = comic.num(); num > comic.num() - 100; num--) {
+                        observable = observable.concatWith(xkcdService.num(num));
                     }
+                    return observable;
                 })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Comic>() {
-                    @Override
-                    public void call(Comic comic) {
-                        comics.add(comic);
-                        adapter.notifyDataSetChanged();
-                    }
+                .subscribe(comic -> {
+                    comics.add(comic);
+                    adapter.notifyDataSetChanged();
                 });
     }
 
