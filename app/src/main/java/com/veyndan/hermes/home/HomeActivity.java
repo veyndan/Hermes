@@ -1,15 +1,16 @@
 package com.veyndan.hermes.home;
 
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.veyndan.hermes.BaseActivity;
-import com.veyndan.hermes.model.Comic;
 import com.veyndan.hermes.R;
+import com.veyndan.hermes.model.Comic;
 import com.veyndan.hermes.service.ComicService;
+import com.veyndan.hermes.ui.AutoLayoutManager;
+import com.veyndan.hermes.util.UIUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +33,8 @@ public class HomeActivity extends BaseActivity {
         setContentView(R.layout.home_activity);
         ButterKnife.bind(this);
 
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setLayoutManager(AutoLayoutManager.staggeredGridLayoutManager(
+                this, UIUtils.getScreenWidth(this), 1080));
         recyclerView.setAdapter(adapter);
 
         ComicService comicService = new ComicService();
