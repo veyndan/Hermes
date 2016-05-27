@@ -1,31 +1,28 @@
 package com.veyndan.hermes.home;
 
 import android.os.Bundle;
-import android.support.v7.widget.RecyclerView;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.veyndan.hermes.BaseActivity;
+import com.veyndan.hermes.FeedFragment;
 import com.veyndan.hermes.R;
-import com.veyndan.hermes.home.model.Comic;
-import com.veyndan.hermes.service.ComicService;
-import com.veyndan.hermes.ui.AutoLayoutManager;
-import com.veyndan.hermes.util.UIUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 
 public class HomeActivity extends BaseActivity {
 
-    @BindView(R.id.recycler_view) RecyclerView recyclerView;
+    @BindView(R.id.pager) ViewPager pager;
 
-    private final List<Comic> comics = new ArrayList<>();
-    private final HomeAdapter adapter = new HomeAdapter(comics);
+    private final List<Fragment> fragments = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,20 +30,31 @@ public class HomeActivity extends BaseActivity {
         setContentView(R.layout.home_activity);
         ButterKnife.bind(this);
 
-        recyclerView.setLayoutManager(AutoLayoutManager.staggeredGridLayoutManager(
-                this, UIUtils.getScreenWidth(this), 1080));
-        recyclerView.setAdapter(adapter);
+        fragments.add(FeedFragment.newInstance());
 
-        ComicService comicService = new ComicService();
+        HomePageAdapter adapter = new HomePageAdapter(getSupportFragmentManager(), fragments);
 
-        comicService.fetchComics(1600)
-                .compose(this.<Comic>bindToLifecycle())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(comic -> {
-                    comics.add(comic);
-                    adapter.notifyDataSetChanged();
-                });
+        pager.setAdapter(adapter);
+    }
+
+    public static class HomePageAdapter extends FragmentPagerAdapter {
+
+        private final List<Fragment> fragments;
+
+        public HomePageAdapter(FragmentManager fm, List<Fragment> fragments) {
+            super(fm);
+            this.fragments = fragments;
+        }
+
+        @Override
+        public int getCount() {
+            return fragments.size();
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            return fragments.get(position);
+        }
     }
 
     @Override

@@ -17,11 +17,11 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.VH> {
+public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.VH> {
 
     private final List<Comic> comics;
 
-    HomeAdapter(List<Comic> comics) {
+    public HomeAdapter(List<Comic> comics) {
         this.comics = comics;
     }
 
