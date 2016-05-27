@@ -33,11 +33,11 @@ public class HomeActivity extends BaseActivity {
     @BindView(R.id.recycler_view) RecyclerView recyclerView;
 
     private final List<Comic> comics = new ArrayList<>();
-    private HomeAdapter adapter;
+    private final HomeAdapter adapter = new HomeAdapter(comics);
 
-    private Moshi moshi = new Moshi.Builder().add(new AutoValueMoshiAdapterFactory()).build();
+    private final Moshi moshi = new Moshi.Builder().add(new AutoValueMoshiAdapterFactory()).build();
 
-    private Retrofit retrofit = new Retrofit.Builder()
+    private final Retrofit retrofit = new Retrofit.Builder()
             .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .baseUrl("https://xkcd.com/")
@@ -57,8 +57,6 @@ public class HomeActivity extends BaseActivity {
         setContentView(R.layout.home_activity);
         ButterKnife.bind(this);
 
-        adapter = new HomeAdapter(comics);
-
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
 
@@ -71,7 +69,7 @@ public class HomeActivity extends BaseActivity {
                     public Observable<Comic> call(Comic comic) {
                         Observable<Comic> observable = Observable.empty();
                         for (int num = comic.num(); num > comic.num() - 100; num--) {
-                            observable = Observable.concat(observable, xkcdService.num(num));
+                            observable = observable.concatWith(xkcdService.num(num));
                         }
                         return observable;
                     }
