@@ -7,6 +7,9 @@ import com.ryanharter.auto.value.moshi.AutoValueMoshiAdapterFactory;
 import com.squareup.moshi.Moshi;
 import com.veyndan.hermes.model.Comic;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.moshi.MoshiConverterFactory;
@@ -72,11 +75,12 @@ public class ComicService {
      */
     @NonNull
     public Observable<Comic> fetchComics(@IntRange(from = 1) int from, @IntRange(from = 1) int to) {
-        Observable<Comic> observable = Observable.empty();
-        for (int num = to; num >= from; num--) {
-            observable = observable.concatWith(xkcdService.num(num));
-        }
-        return observable;
+        List<Integer> numRange = new ArrayList<>(to - from + 1);
+        for (int num = to; num >= from; num--) numRange.add(num);
+
+        // Unsure how to use Observable.range() in reverse.
+        return Observable.from(numRange)
+                .flatMap(xkcdService::num);
     }
 
 }
