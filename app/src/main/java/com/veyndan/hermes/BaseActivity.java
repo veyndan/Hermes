@@ -6,24 +6,17 @@ import android.support.v7.widget.Toolbar;
 
 import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class BaseActivity extends RxAppCompatActivity {
 
-    @Nullable private Toolbar toolbar;
-
-    @Nullable
-    protected Toolbar getToolbar() {
-        if (toolbar == null) {
-            toolbar = (Toolbar) findViewById(R.id.toolbar);
-            if (toolbar != null) {
-                setSupportActionBar(toolbar);
-            }
-        }
-        return toolbar;
-    }
+    @Nullable @BindView(R.id.toolbar) Toolbar toolbar;
 
     @Override
     public void setContentView(@LayoutRes int layoutResID) {
         super.setContentView(layoutResID);
-        getToolbar();
+        ButterKnife.bind(this);
+        setSupportActionBar(toolbar);
     }
 }
