@@ -1,7 +1,6 @@
 package com.veyndan.hermes;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,8 +9,7 @@ import android.view.ViewGroup;
 import com.veyndan.hermes.home.HomeAdapter;
 import com.veyndan.hermes.home.model.Comic;
 import com.veyndan.hermes.service.ComicService;
-import com.veyndan.hermes.ui.AutoLayoutManager;
-import com.veyndan.hermes.util.UIUtils;
+import com.veyndan.hermes.ui.AutoStaggeredGridLayoutManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,8 +35,7 @@ public class FeedFragment extends BaseFragment {
                              Bundle savedInstanceState) {
         RecyclerView recyclerView =
                 (RecyclerView) inflater.inflate(R.layout.feed_fragment, container, false);
-        recyclerView.setLayoutManager(AutoLayoutManager.staggeredGridLayoutManager(
-                getActivity(), UIUtils.getScreenWidth((AppCompatActivity) getActivity()), 1080));
+        recyclerView.setLayoutManager(new AutoStaggeredGridLayoutManager(700));
         recyclerView.setAdapter(adapter);
 
         ComicService comicService = new ComicService();
