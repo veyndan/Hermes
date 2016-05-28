@@ -80,7 +80,7 @@ public class ComicService {
 
         // Unsure how to use Observable.range() in reverse.
         return Observable.from(numRange)
-                .flatMap(xkcdService::num);
+                .concatMap(xkcdService::num);
     }
 
 }
