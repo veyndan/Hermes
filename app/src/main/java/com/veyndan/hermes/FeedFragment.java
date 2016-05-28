@@ -1,11 +1,15 @@
 package com.veyndan.hermes;
 
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.squareup.sqlbrite.BriteDatabase;
+import com.squareup.sqlbrite.SqlBrite;
+import com.veyndan.hermes.database.DbHelper;
 import com.veyndan.hermes.home.HomeAdapter;
 import com.veyndan.hermes.home.model.Comic;
 import com.veyndan.hermes.service.ComicService;
@@ -40,11 +44,15 @@ public class FeedFragment extends BaseFragment {
 
         ComicService comicService = new ComicService();
 
+        SqlBrite sqlBrite = SqlBrite.create();
+        BriteDatabase db = sqlBrite.wrapDatabaseHelper(new DbHelper(getActivity()), Schedulers.io());
+
         comicService.fetchComics(1600)
                 .compose(this.<Comic>bindToLifecycle())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(comic -> {
+                    db.insert(Comic.TABLE, comic.toContentValues(comic), SQLiteDatabase.CONFLICT_IGNORE);
                     comics.add(comic);
                     adapter.notifyDataSetChanged();
                 });
