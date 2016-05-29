@@ -1,10 +1,8 @@
 package com.veyndan.hermes;
 
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteQueryBuilder;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,15 +49,15 @@ public class FeedFragment extends BaseFragment {
         SqlBrite sqlBrite = SqlBrite.create();
         BriteDatabase db = sqlBrite.wrapDatabaseHelper(new DbHelper(getActivity()), Schedulers.io());
 
-        String sql = SQLiteQueryBuilder.buildQueryString(false, Comic.TABLE, null, null, null, null, Comic.NUM + " DESC", "1");
-        db.createQuery(Comic.TABLE, sql)
-                .compose(this.<SqlBrite.Query>bindToLifecycle())
-                .flatMap(query -> query.asRows(Comic.MAPPER))
-                .flatMap(comic -> comicService.fetchComics(comic.num()))
-                .switchIfEmpty(comicService.fetchComics())
-                .observeOn(Schedulers.io())
-                .subscribeOn(AndroidSchedulers.mainThread())
-                .subscribe(comic -> Log.d(TAG, "onCreateView:" + comic));
+//        String sql = SQLiteQueryBuilder.buildQueryString(false, Comic.TABLE, null, null, null, null, Comic.NUM + " DESC", "1");
+//        db.createQuery(Comic.TABLE, sql)
+//                .compose(this.<SqlBrite.Query>bindToLifecycle())
+//                .flatMap(query -> query.asRows(Comic.MAPPER))
+//                .flatMap(comic -> comicService.fetchComics(comic.num()))
+//                .switchIfEmpty(comicService.fetchComics())
+//                .observeOn(Schedulers.io())
+//                .subscribeOn(AndroidSchedulers.mainThread())
+//                .subscribe(comic -> Log.d(TAG, "onCreateView:" + comic));
 
 //        db.createQuery(Comic.TABLE, "SELECT * FROM " + Comic.TABLE)
 //                .compose(this.<SqlBrite.Query>bindToLifecycle())
@@ -74,13 +72,24 @@ public class FeedFragment extends BaseFragment {
 //                    adapter.notifyDataSetChanged();
 //                });
 //
-        comicService.fetchComics(1600, 1650)
+        comicService.fetchComics(1600, 1660)
                 .compose(this.<Comic>bindToLifecycle())
+                .buffer(20)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(comic -> {
-                    db.insert(Comic.TABLE, comic.toContentValues(comic), SQLiteDatabase.CONFLICT_IGNORE);
-                    comics.add(comic);
+                .subscribe(comics -> {
+
+                    BriteDatabase.Transaction transaction = db.newTransaction();
+                    try {
+                        for (Comic comic : comics) {
+                            db.insert(Comic.TABLE, comic.toContentValues(comic), SQLiteDatabase.CONFLICT_IGNORE);
+                        }
+                        transaction.markSuccessful();
+                    } finally {
+                        transaction.end();
+                    }
+
+                    this.comics.addAll(comics);
                     adapter.notifyDataSetChanged();
                 });
 
