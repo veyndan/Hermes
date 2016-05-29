@@ -49,12 +49,12 @@ public abstract class Comic {
     }
 
     @NonNull
-    public ContentValues toContentValues(@NonNull Comic comic) {
+    public ContentValues toContentValues() {
         ContentValues values = new ContentValues();
-        values.put(NUM, comic.num());
-        values.put(ALT, comic.alt());
-        values.put(IMG, comic.img());
-        values.put(TITLE, comic.title());
+        values.put(NUM, num());
+        values.put(ALT, alt());
+        values.put(IMG, img());
+        values.put(TITLE, title());
         return values;
     }
 }

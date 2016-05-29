@@ -82,7 +82,7 @@ public class FeedFragment extends BaseFragment {
                     BriteDatabase.Transaction transaction = db.newTransaction();
                     try {
                         for (Comic comic : comics) {
-                            db.insert(Comic.TABLE, comic.toContentValues(comic), SQLiteDatabase.CONFLICT_IGNORE);
+                            db.insert(Comic.TABLE, comic.toContentValues(), SQLiteDatabase.CONFLICT_IGNORE);
                         }
                         transaction.markSuccessful();
                     } finally {
