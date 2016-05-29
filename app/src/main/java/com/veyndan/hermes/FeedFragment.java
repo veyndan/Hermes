@@ -1,8 +1,10 @@
 package com.veyndan.hermes;
 
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteQueryBuilder;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +24,8 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
 public class FeedFragment extends BaseFragment {
+
+    private static final String TAG = "veyndan_FeedFragment";
 
     private final List<Comic> comics = new ArrayList<>();
     private final HomeAdapter adapter = new HomeAdapter(comics);
@@ -47,7 +51,30 @@ public class FeedFragment extends BaseFragment {
         SqlBrite sqlBrite = SqlBrite.create();
         BriteDatabase db = sqlBrite.wrapDatabaseHelper(new DbHelper(getActivity()), Schedulers.io());
 
-        comicService.fetchComics(1600)
+        String sql = SQLiteQueryBuilder.buildQueryString(false, Comic.TABLE, null, null, null, null, Comic.NUM + " DESC", "1");
+        db.createQuery(Comic.TABLE, sql)
+                .compose(this.<SqlBrite.Query>bindToLifecycle())
+                .flatMap(query -> query.asRows(Comic.MAPPER))
+                .flatMap(comic -> comicService.fetchComics(comic.num()))
+                .switchIfEmpty(comicService.fetchComics())
+                .observeOn(Schedulers.io())
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .subscribe(comic -> Log.d(TAG, "onCreateView:" + comic));
+
+//        db.createQuery(Comic.TABLE, "SELECT * FROM " + Comic.TABLE)
+//                .compose(this.<SqlBrite.Query>bindToLifecycle())
+//                .concatMap(query -> query.asRows(Comic.MAPPER))
+//                .concatWith(db.createQuery(Comic.TABLE, "SELECT MAX(_id) FROM " + Comic.TABLE)
+//                        .flatMap(query -> query.asRows(Comic.MAPPER))
+//                        .flatMap(comic -> comicService.fetchComics(comic.num())))
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(comic -> {
+//                    comics.add(comic);
+//                    adapter.notifyDataSetChanged();
+//                });
+//
+        comicService.fetchComics(1600, 1650)
                 .compose(this.<Comic>bindToLifecycle())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
