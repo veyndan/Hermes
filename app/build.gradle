@@ -55,6 +55,8 @@ dependencies {
     compile 'com.google.auto.value:auto-value:1.2'
     apt "com.google.auto.value:auto-value:1.2"
     apt 'com.ryanharter.auto.value:auto-value-moshi:0.3.2'
+    apt 'com.gabrielittner.auto.value:auto-value-cursor:0.4.0'
+    compile 'com.gabrielittner.auto.value:auto-value-cursor-annotations:0.4.0'
 
     // UI
     compile 'com.github.bumptech.glide:glide:3.7.0'

@@ -3,21 +3,16 @@ package com.veyndan.hermes.home.model;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.provider.BaseColumns;
-import android.support.annotation.NonNull;
-import android.util.Log;
 
+import com.gabrielittner.auto.value.cursor.ColumnName;
 import com.google.auto.value.AutoValue;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
-
-import java.util.Arrays;
 
 import rx.functions.Func1;
 
 @AutoValue
 public abstract class Comic {
-
-    private static final String TAG = "veyndan_Comic";
 
     public static final String TABLE = "xkcd";
 
@@ -26,35 +21,24 @@ public abstract class Comic {
     public static final String IMG = "img";
     public static final String TITLE = "title";
 
-    public abstract int num();
+    @ColumnName(NUM) public abstract int num();
     public abstract String alt();
     public abstract String img();
     public abstract String title();
+
+    public abstract ContentValues toContentValues();
 
     public static JsonAdapter<Comic> jsonAdapter(Moshi moshi) {
         return new AutoValue_Comic.MoshiJsonAdapter(moshi);
     }
 
-    public static final Func1<Cursor, Comic> MAPPER = cursor -> {
-        Log.d(TAG, "MAPPER: " + Arrays.toString(cursor.getColumnNames()));
-        int num = cursor.getInt(cursor.getColumnIndexOrThrow(NUM));
-        String alt = cursor.getString(cursor.getColumnIndexOrThrow(ALT));
-        String img = cursor.getString(cursor.getColumnIndexOrThrow(IMG));
-        String title = cursor.getString(cursor.getColumnIndexOrThrow(TITLE));
-        return new AutoValue_Comic(num, alt, img, title);
-    };
+    public static Comic create(Cursor cursor) {
+        return AutoValue_Comic.createFromCursor(cursor);
+    }
+
+    public static final Func1<Cursor, Comic> MAPPER = Comic::create;
 
     public String displayNum() {
         return "#" + num();
-    }
-
-    @NonNull
-    public ContentValues toContentValues() {
-        ContentValues values = new ContentValues();
-        values.put(NUM, num());
-        values.put(ALT, alt());
-        values.put(IMG, img());
-        values.put(TITLE, title());
-        return values;
     }
 }
