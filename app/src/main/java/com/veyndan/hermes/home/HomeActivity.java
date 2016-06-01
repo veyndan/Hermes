@@ -17,6 +17,7 @@ import com.veyndan.hermes.service.ComicService;
 import com.veyndan.hermes.ui.AutoStaggeredGridLayoutManager;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import butterknife.BindView;
@@ -90,10 +91,18 @@ public class HomeActivity extends BaseActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_filter_favorites:
+                item.setChecked(!item.isChecked());
+                return true;
             case R.id.action_filter_unread:
+                item.setChecked(!item.isChecked());
+                return true;
             case R.id.action_sort_new:
             case R.id.action_sort_old:
-                item.setChecked(!item.isChecked());
+                // If the item is already checked, then the direction of the list is correct as is.
+                if (item.isChecked()) return false;
+                item.setChecked(true);
+                Collections.reverse(comics);
+                adapter.notifyDataSetChanged();
                 return true;
             case R.id.action_settings:
                 return true;
