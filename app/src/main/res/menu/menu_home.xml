@@ -28,6 +28,30 @@
     </item>
 
     <item
+        android:icon="@drawable/ic_sort_white"
+        android:title="@string/action_filter"
+        app:showAsAction="ifRoom">
+
+        <menu>
+
+            <group android:checkableBehavior="single">
+
+                <item
+                    android:id="@+id/action_sort_new"
+                    android:checked="true"
+                    android:title="@string/action_sort_new"/>
+
+                <item
+                    android:id="@+id/action_sort_old"
+                    android:title="@string/action_sort_old"/>
+
+            </group>
+
+        </menu>
+
+    </item>
+
+    <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
         android:title="@string/action_settings"

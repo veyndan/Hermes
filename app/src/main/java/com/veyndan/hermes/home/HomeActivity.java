@@ -91,6 +91,8 @@ public class HomeActivity extends BaseActivity {
         switch (item.getItemId()) {
             case R.id.action_filter_favorites:
             case R.id.action_filter_unread:
+            case R.id.action_sort_new:
+            case R.id.action_sort_old:
                 item.setChecked(!item.isChecked());
                 return true;
             case R.id.action_settings:

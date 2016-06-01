@@ -6,4 +6,6 @@
     <string name="action_filter">Filter</string>
     <string name="action_filter_favorites">Favorites</string>
     <string name="action_filter_unread">Unread</string>
+    <string name="action_sort_new">New</string>
+    <string name="action_sort_old">Old</string>
 </resources>
