@@ -3,4 +3,7 @@
     <string name="action_settings">Settings</string>
 
     <string name="comic_img_content_description">Comic image</string>
+    <string name="action_filter">Filter</string>
+    <string name="action_filter_favorites">Favorites</string>
+    <string name="action_filter_unread">Unread</string>
 </resources>

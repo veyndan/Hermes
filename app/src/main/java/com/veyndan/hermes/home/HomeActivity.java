@@ -89,6 +89,10 @@ public class HomeActivity extends BaseActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.action_filter_favorites:
+            case R.id.action_filter_unread:
+                item.setChecked(!item.isChecked());
+                return true;
             case R.id.action_settings:
                 return true;
             default:
