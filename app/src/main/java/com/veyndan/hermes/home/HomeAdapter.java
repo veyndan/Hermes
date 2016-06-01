@@ -9,8 +9,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.veyndan.hermes.home.model.Comic;
+import com.jakewharton.rxbinding.view.RxView;
 import com.veyndan.hermes.R;
+import com.veyndan.hermes.home.model.Comic;
 
 import java.util.List;
 
@@ -57,14 +58,11 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.VH> {
             super(itemView);
             ButterKnife.bind(this, itemView);
 
-            img.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
-                @Override
-                public void onLayoutChange(View v, int left, int top, int right, int bottom,
-                                           int oldLeft, int oldTop, int oldRight, int oldBottom) {
-                    img.removeOnLayoutChangeListener(this);
-                    img.getLayoutParams().height = (int) (img.getWidth() * (9f / 16f));
-                }
-            });
+            RxView.layoutChangeEvents(img)
+                    .take(1)
+                    .subscribe(viewLayoutChangeEvent -> {
+                        img.getLayoutParams().height = (int) (img.getWidth() * (9f / 16f));
+                    });
         }
     }
 }
