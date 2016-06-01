@@ -1,28 +1,40 @@
 package com.veyndan.hermes.home;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.squareup.sqlbrite.BriteDatabase;
+import com.squareup.sqlbrite.SqlBrite;
 import com.veyndan.hermes.BaseActivity;
-import com.veyndan.hermes.FeedFragment;
 import com.veyndan.hermes.R;
+import com.veyndan.hermes.database.Db;
+import com.veyndan.hermes.database.DbHelper;
+import com.veyndan.hermes.home.model.Comic;
+import com.veyndan.hermes.service.ComicService;
+import com.veyndan.hermes.ui.AutoStaggeredGridLayoutManager;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 public class HomeActivity extends BaseActivity {
 
-    @BindView(R.id.pager) ViewPager pager;
+    private static final String TAG = "veyndan_HomeActivity";
 
-    private final List<Fragment> fragments = new ArrayList<>();
+    private static final int BUFFER_SIZE = 20;
+
+    @BindView(R.id.recycler_view) RecyclerView recyclerView;
+
+    private final List<Comic> comics = new ArrayList<>();
+    private final HomeAdapter adapter = new HomeAdapter(comics);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,31 +42,40 @@ public class HomeActivity extends BaseActivity {
         setContentView(R.layout.home_activity);
         ButterKnife.bind(this);
 
-        fragments.add(FeedFragment.newInstance());
+        recyclerView.setLayoutManager(new AutoStaggeredGridLayoutManager(700));
+        recyclerView.setAdapter(adapter);
 
-        HomePageAdapter adapter = new HomePageAdapter(getSupportFragmentManager(), fragments);
+        ComicService comicService = new ComicService();
 
-        pager.setAdapter(adapter);
-    }
+        SqlBrite sqlBrite = SqlBrite.create();
+        BriteDatabase db = sqlBrite.wrapDatabaseHelper(new DbHelper(this), Schedulers.io());
 
-    public static class HomePageAdapter extends FragmentPagerAdapter {
+        Observable<List<Comic>> network = comicService.fetchComics(1, 40)
+                .buffer(BUFFER_SIZE)
+                .doOnNext(comics -> {
+                    Db.insert(db, comics);
+                    Log.d(TAG, "Network request: " + comics.get(0).num() + " to " + comics.get(comics.size() - 1).num());
+                });
 
-        private final List<Fragment> fragments;
+        db.createQuery(Comic.TABLE, "SELECT * FROM " + Comic.TABLE + " ORDER BY " + Comic.NUM + " DESC")
+                .compose(this.<SqlBrite.Query>bindToLifecycle())
+                .concatMap(query -> query.asRows(Comic.MAPPER))
+                .onBackpressureBuffer()
+                .buffer(BUFFER_SIZE)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(comics -> {
+                    this.comics.addAll(comics);
+                    adapter.notifyDataSetChanged();
+                });
 
-        public HomePageAdapter(FragmentManager fm, List<Fragment> fragments) {
-            super(fm);
-            this.fragments = fragments;
-        }
-
-        @Override
-        public int getCount() {
-            return fragments.size();
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            return fragments.get(position);
-        }
+//        network
+//                .compose(this.<List<Comic>>bindToLifecycle())
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(comics -> {
+//                    this.comics.addAll(comics);
+//                    adapter.notifyDataSetChanged();
+//                });
     }
 
     @Override
