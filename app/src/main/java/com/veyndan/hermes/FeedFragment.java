@@ -53,7 +53,7 @@ public class FeedFragment extends BaseFragment {
         SqlBrite sqlBrite = SqlBrite.create();
         BriteDatabase db = sqlBrite.wrapDatabaseHelper(new DbHelper(getContext()), Schedulers.io());
 
-        Observable<List<Comic>> network = comicService.fetchComics(1, 10)
+        Observable<List<Comic>> network = comicService.fetchComics(1, 40)
                 .buffer(BUFFER_SIZE)
                 .doOnNext(comics -> {
                     Db.insert(db, comics);
@@ -64,9 +64,10 @@ public class FeedFragment extends BaseFragment {
                 .compose(this.<SqlBrite.Query>bindToLifecycle())
                 .concatMap(query -> query.asRows(Comic.MAPPER))
                 .onBackpressureBuffer()
+                .buffer(BUFFER_SIZE)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(comic -> {
-                    this.comics.add(comic);
+                .subscribe(comics -> {
+                    this.comics.addAll(comics);
                     adapter.notifyDataSetChanged();
                 });
 
