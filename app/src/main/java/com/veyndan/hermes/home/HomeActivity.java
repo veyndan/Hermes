@@ -50,6 +50,11 @@ public class HomeActivity extends BaseActivity {
         SqlBrite sqlBrite = SqlBrite.create();
         BriteDatabase db = sqlBrite.wrapDatabaseHelper(new DbHelper(this), Schedulers.io());
 
+        Observable<List<Comic>> database = db.createQuery(Comic.TABLE, "SELECT * FROM " + Comic.TABLE + " ORDER BY " + Comic.NUM + " DESC")
+                .concatMap(query -> query.asRows(Comic.MAPPER))
+                .onBackpressureBuffer()
+                .buffer(BUFFER_SIZE);
+
         Observable<List<Comic>> network = comicService.fetchComics(1, 40)
                 .buffer(BUFFER_SIZE)
                 .doOnNext(comics -> {
@@ -57,11 +62,8 @@ public class HomeActivity extends BaseActivity {
                     Log.d(TAG, "Network request: " + comics.get(0).num() + " to " + comics.get(comics.size() - 1).num());
                 });
 
-        db.createQuery(Comic.TABLE, "SELECT * FROM " + Comic.TABLE + " ORDER BY " + Comic.NUM + " DESC")
-                .compose(this.<SqlBrite.Query>bindToLifecycle())
-                .concatMap(query -> query.asRows(Comic.MAPPER))
-                .onBackpressureBuffer()
-                .buffer(BUFFER_SIZE)
+        database
+                .compose(this.<List<Comic>>bindToLifecycle())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(comics -> {
                     this.comics.addAll(comics);
