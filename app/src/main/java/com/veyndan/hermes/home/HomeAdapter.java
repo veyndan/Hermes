@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import com.bumptech.glide.Glide;
 import com.jakewharton.rxbinding.view.RxView;
@@ -53,6 +54,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.VH> {
         @BindView(R.id.title) TextView title;
         @BindView(R.id.num) TextView num;
         @BindView(R.id.alt) TextView alt;
+        @BindView(R.id.favorite) ToggleButton favorite;
 
         public VH(View itemView) {
             super(itemView);

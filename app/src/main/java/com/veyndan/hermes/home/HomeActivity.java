@@ -63,22 +63,22 @@ public class HomeActivity extends BaseActivity {
                     Log.d(TAG, "Network request: " + comics.get(0).num() + " to " + comics.get(comics.size() - 1).num());
                 });
 
-        database
-                .compose(this.<List<Comic>>bindToLifecycle())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(comics -> {
-                    this.comics.addAll(comics);
-                    adapter.notifyDataSetChanged();
-                });
-
-//        network
+//        database
 //                .compose(this.<List<Comic>>bindToLifecycle())
-//                .subscribeOn(Schedulers.io())
 //                .observeOn(AndroidSchedulers.mainThread())
 //                .subscribe(comics -> {
 //                    this.comics.addAll(comics);
 //                    adapter.notifyDataSetChanged();
 //                });
+
+        network
+                .compose(this.<List<Comic>>bindToLifecycle())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(comics -> {
+                    this.comics.addAll(comics);
+                    adapter.notifyDataSetChanged();
+                });
     }
 
     @Override
