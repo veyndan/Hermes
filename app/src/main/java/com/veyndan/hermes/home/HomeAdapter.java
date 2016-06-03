@@ -11,6 +11,7 @@ import android.widget.ToggleButton;
 
 import com.bumptech.glide.Glide;
 import com.jakewharton.rxbinding.view.RxView;
+import com.squareup.sqlbrite.BriteDatabase;
 import com.veyndan.hermes.R;
 import com.veyndan.hermes.home.model.Comic;
 
@@ -21,10 +22,14 @@ import butterknife.ButterKnife;
 
 public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.VH> {
 
-    private final List<Comic> comics;
+    private static final String TAG = "veyndan_HomeAdapter";
 
-    public HomeAdapter(List<Comic> comics) {
+    private final List<Comic> comics;
+    private final BriteDatabase db;
+
+    public HomeAdapter(List<Comic> comics, BriteDatabase db) {
         this.comics = comics;
+        this.db = db;
     }
 
     @Override
@@ -42,6 +47,12 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.VH> {
         holder.title.setText(comic.title());
         holder.num.setText(comic.displayNum());
         holder.alt.setText(comic.alt());
+        holder.favorite.setChecked(comic.favorite());
+
+        RxView.clicks(holder.favorite)
+                .subscribe(aVoid -> {
+                    db.update(Comic.TABLE, comic.withFavorite(holder.favorite.isChecked()).toContentValues(), Comic.NUM + " = ?", String.valueOf(comic.num()));
+                });
     }
 
     @Override

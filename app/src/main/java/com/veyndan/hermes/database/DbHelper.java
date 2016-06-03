@@ -8,7 +8,7 @@ import com.veyndan.hermes.home.model.Comic;
 
 public final class DbHelper extends SQLiteOpenHelper {
 
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "Hermes.db";
 
     String CREATE_TABLE = ""
@@ -17,7 +17,8 @@ public final class DbHelper extends SQLiteOpenHelper {
             + Comic.NUM + " INTEGER PRIMARY KEY,"
             + Comic.ALT + " TEXT,"
             + Comic.IMG + " TEXT,"
-            + Comic.TITLE + " TEXT"
+            + Comic.TITLE + " TEXT,"
+            + Comic.FAVORITE + " INTEGER"
             + ")";
 
     public DbHelper(Context context) {

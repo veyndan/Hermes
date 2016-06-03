@@ -20,11 +20,15 @@ public abstract class Comic {
     public static final String ALT = "alt";
     public static final String IMG = "img";
     public static final String TITLE = "title";
+    public static final String FAVORITE = "favorite";
 
     @ColumnName(NUM) public abstract int num();
     public abstract String alt();
     public abstract String img();
     public abstract String title();
+    public abstract boolean favorite();
+
+    public abstract Comic withFavorite(boolean favorite);
 
     public abstract ContentValues toContentValues();
 

@@ -1,6 +1,8 @@
 package com.veyndan.hermes.home;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
@@ -35,7 +37,7 @@ public class HomeActivity extends BaseActivity {
     @BindView(R.id.recycler_view) RecyclerView recyclerView;
 
     private final List<Comic> comics = new ArrayList<>();
-    private final HomeAdapter adapter = new HomeAdapter(comics);
+    private HomeAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,18 +45,26 @@ public class HomeActivity extends BaseActivity {
         setContentView(R.layout.home_activity);
         ButterKnife.bind(this);
 
-        recyclerView.setLayoutManager(new AutoStaggeredGridLayoutManager(700));
-        recyclerView.setAdapter(adapter);
-
-        ComicService comicService = new ComicService();
-
         SqlBrite sqlBrite = SqlBrite.create();
         BriteDatabase db = sqlBrite.wrapDatabaseHelper(new DbHelper(this), Schedulers.io());
 
+        adapter = new HomeAdapter(comics, db);
+
+        recyclerView.setLayoutManager(new AutoStaggeredGridLayoutManager(700));
+        recyclerView.setAdapter(adapter);
+        recyclerView.setItemAnimator(new DefaultItemAnimator() {
+            @Override
+            public boolean canReuseUpdatedViewHolder(@NonNull RecyclerView.ViewHolder viewHolder) {
+                // Allows animations to persist through notification of data set change.
+                return true;
+            }
+        });
+
+        ComicService comicService = new ComicService();
+
         Observable<List<Comic>> database = db.createQuery(Comic.TABLE, "SELECT * FROM " + Comic.TABLE + " ORDER BY " + Comic.NUM + " DESC")
-                .concatMap(query -> query.asRows(Comic.MAPPER))
-                .onBackpressureBuffer()
-                .buffer(BUFFER_SIZE);
+                .concatMap(query -> query.asRows(Comic.MAPPER).toList())
+                .onBackpressureBuffer();
 
         Observable<List<Comic>> network = comicService.fetchComics(1, 40)
                 .buffer(BUFFER_SIZE)
@@ -63,22 +73,22 @@ public class HomeActivity extends BaseActivity {
                     Log.d(TAG, "Network request: " + comics.get(0).num() + " to " + comics.get(comics.size() - 1).num());
                 });
 
-//        database
+        database
+                .compose(this.<List<Comic>>bindToLifecycle())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(comics -> {
+                    this.comics.clear();
+                    this.comics.addAll(comics);
+                });
+
+//        network
 //                .compose(this.<List<Comic>>bindToLifecycle())
+//                .subscribeOn(Schedulers.io())
 //                .observeOn(AndroidSchedulers.mainThread())
 //                .subscribe(comics -> {
 //                    this.comics.addAll(comics);
 //                    adapter.notifyDataSetChanged();
 //                });
-
-        network
-                .compose(this.<List<Comic>>bindToLifecycle())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(comics -> {
-                    this.comics.addAll(comics);
-                    adapter.notifyDataSetChanged();
-                });
     }
 
     @Override
