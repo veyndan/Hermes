@@ -90,12 +90,6 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.VH> {
         public VH(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
-
-            RxView.layoutChangeEvents(img)
-                    .take(1)
-                    .subscribe(viewLayoutChangeEvent -> {
-                        img.getLayoutParams().height = (int) (img.getWidth() * (9f / 16f));
-                    });
         }
     }
 }
