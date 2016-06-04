@@ -10,6 +10,8 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.target.ImageViewTarget;
 import com.jakewharton.rxbinding.view.RxView;
 import com.squareup.sqlbrite.BriteDatabase;
 import com.veyndan.hermes.R;
@@ -43,7 +45,15 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.VH> {
         Context context = holder.itemView.getContext();
         Comic comic = comics.get(position);
 
-        Glide.with(context).load(comic.img()).into(holder.img);
+        Glide.with(context).load(comic.img()).into(new ImageViewTarget<GlideDrawable>(holder.img) {
+            @Override
+            protected void setResource(GlideDrawable resource) {
+                float ratio = (float) resource.getIntrinsicHeight() / resource.getIntrinsicWidth();
+                float height = holder.img.getWidth() * ratio;
+                holder.img.getLayoutParams().height = (int) height;
+                setDrawable(resource);
+            }
+        });
         holder.title.setText(comic.title());
         holder.num.setText(comic.displayNum());
         holder.alt.setText(comic.alt());
