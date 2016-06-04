@@ -1,15 +1,16 @@
 package com.veyndan.hermes.home;
 
+import android.database.sqlite.SQLiteQueryBuilder;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.squareup.sqlbrite.BriteDatabase;
-import com.squareup.sqlbrite.QueryObservable;
 import com.squareup.sqlbrite.SqlBrite;
 import com.veyndan.hermes.BaseActivity;
 import com.veyndan.hermes.R;
@@ -36,13 +37,15 @@ public class HomeActivity extends BaseActivity {
 
     private static final int BUFFER_SIZE = 20;
 
+    private static final String SELECT_FAVORITES = String.format("%s = 1", Comic.FAVORITE);
+
     @BindView(R.id.recycler_view) RecyclerView recyclerView;
 
     private final List<Comic> comics = new ArrayList<>();
     private HomeAdapter adapter;
 
     private BriteDatabase db;
-    private List<Integer> filters = new ArrayList<>(2);
+    private List<String> filters = new ArrayList<>(2);
     private Subscription databaseSubscription;
 
     @Override
@@ -90,14 +93,10 @@ public class HomeActivity extends BaseActivity {
     private void query() {
         if (databaseSubscription != null) databaseSubscription.unsubscribe();
 
-        QueryObservable database;
-        if (filters.contains(R.id.action_filter_favorites)) {
-            database = db.createQuery(Comic.TABLE, String.format("SELECT * FROM %s WHERE %s ORDER BY %s DESC", Comic.TABLE, Comic.FAVORITE, Comic.NUM));
-        } else {
-            database = db.createQuery(Comic.TABLE, String.format("SELECT * FROM %s ORDER BY %s DESC", Comic.TABLE, Comic.NUM));
-        }
+        String sql = SQLiteQueryBuilder.buildQueryString(false, Comic.TABLE, null,
+                TextUtils.join(" ", filters), null, null, Comic.NUM + " DESC", null);
 
-        databaseSubscription = database
+        databaseSubscription = db.createQuery(Comic.TABLE, sql)
                 .compose(this.<SqlBrite.Query>bindToLifecycle())
                 .concatMap(query -> query.asRows(Comic.MAPPER).toList())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -119,8 +118,8 @@ public class HomeActivity extends BaseActivity {
         switch (item.getItemId()) {
             case R.id.action_filter_favorites:
                 item.setChecked(!item.isChecked());
-                if (item.isChecked()) filters.add(item.getItemId());
-                else filters.remove(Integer.valueOf(item.getItemId()));
+                if (item.isChecked()) filters.add(SELECT_FAVORITES);
+                else filters.remove(SELECT_FAVORITES);
                 query();
                 return true;
             case R.id.action_filter_unread:
