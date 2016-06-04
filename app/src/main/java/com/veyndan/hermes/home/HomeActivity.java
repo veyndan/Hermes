@@ -9,6 +9,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.squareup.sqlbrite.BriteDatabase;
+import com.squareup.sqlbrite.QueryObservable;
 import com.squareup.sqlbrite.SqlBrite;
 import com.veyndan.hermes.BaseActivity;
 import com.veyndan.hermes.R;
@@ -25,6 +26,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import rx.Observable;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
@@ -39,6 +41,10 @@ public class HomeActivity extends BaseActivity {
     private final List<Comic> comics = new ArrayList<>();
     private HomeAdapter adapter;
 
+    private BriteDatabase db;
+    private List<Integer> filters = new ArrayList<>(2);
+    private Subscription databaseSubscription;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,7 +52,7 @@ public class HomeActivity extends BaseActivity {
         ButterKnife.bind(this);
 
         SqlBrite sqlBrite = SqlBrite.create();
-        BriteDatabase db = sqlBrite.wrapDatabaseHelper(new DbHelper(this), Schedulers.io());
+        db = sqlBrite.wrapDatabaseHelper(new DbHelper(this), Schedulers.io());
 
         adapter = new HomeAdapter(comics, db);
 
@@ -62,23 +68,13 @@ public class HomeActivity extends BaseActivity {
 
         ComicService comicService = new ComicService();
 
-        Observable<List<Comic>> database = db.createQuery(Comic.TABLE, String.format("SELECT * FROM %s ORDER BY %s DESC", Comic.TABLE, Comic.NUM))
-                .concatMap(query -> query.asRows(Comic.MAPPER).toList())
-                .onBackpressureBuffer();
+        query();
 
         Observable<List<Comic>> network = comicService.fetchComics(1, 40)
                 .buffer(BUFFER_SIZE)
                 .doOnNext(comics -> {
                     Db.insert(db, comics);
                     Log.d(TAG, "Network request: " + comics.get(0).num() + " to " + comics.get(comics.size() - 1).num());
-                });
-
-        database
-                .compose(this.<List<Comic>>bindToLifecycle())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(comics -> {
-                    this.comics.clear();
-                    this.comics.addAll(comics);
                 });
 
 //        network
@@ -89,6 +85,27 @@ public class HomeActivity extends BaseActivity {
 //                    this.comics.addAll(comics);
 //                    adapter.notifyDataSetChanged();
 //                });
+    }
+
+    private void query() {
+        if (databaseSubscription != null) databaseSubscription.unsubscribe();
+
+        QueryObservable database;
+        if (filters.contains(R.id.action_filter_favorites)) {
+            database = db.createQuery(Comic.TABLE, String.format("SELECT * FROM %s WHERE %s ORDER BY %s DESC", Comic.TABLE, Comic.FAVORITE, Comic.NUM));
+        } else {
+            database = db.createQuery(Comic.TABLE, String.format("SELECT * FROM %s ORDER BY %s DESC", Comic.TABLE, Comic.NUM));
+        }
+
+        databaseSubscription = database
+                .compose(this.<SqlBrite.Query>bindToLifecycle())
+                .concatMap(query -> query.asRows(Comic.MAPPER).toList())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(comics -> {
+                    this.comics.clear();
+                    this.comics.addAll(comics);
+                    adapter.notifyDataSetChanged();
+                });
     }
 
     @Override
@@ -102,6 +119,9 @@ public class HomeActivity extends BaseActivity {
         switch (item.getItemId()) {
             case R.id.action_filter_favorites:
                 item.setChecked(!item.isChecked());
+                if (item.isChecked()) filters.add(item.getItemId());
+                else filters.remove(Integer.valueOf(item.getItemId()));
+                query();
                 return true;
             case R.id.action_filter_unread:
                 item.setChecked(!item.isChecked());
