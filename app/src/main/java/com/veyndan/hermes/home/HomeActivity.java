@@ -62,7 +62,7 @@ public class HomeActivity extends BaseActivity {
 
         ComicService comicService = new ComicService();
 
-        Observable<List<Comic>> database = db.createQuery(Comic.TABLE, "SELECT * FROM " + Comic.TABLE + " ORDER BY " + Comic.NUM + " DESC")
+        Observable<List<Comic>> database = db.createQuery(Comic.TABLE, String.format("SELECT * FROM %s ORDER BY %s DESC", Comic.TABLE, Comic.NUM))
                 .concatMap(query -> query.asRows(Comic.MAPPER).toList())
                 .onBackpressureBuffer();
 
