@@ -16,6 +16,7 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import com.jakewharton.rxbinding.view.RxView;
 import com.squareup.sqlbrite.BriteDatabase;
 import com.veyndan.hermes.R;
+import com.veyndan.hermes.database.Db;
 import com.veyndan.hermes.home.model.Comic;
 
 import java.util.List;
@@ -55,7 +56,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.VH> {
                     float height = holder.img.getWidth() * ratio;
                     holder.img.getLayoutParams().height = (int) height;
                     holder.img.setImageDrawable(resource);
-                    db.update(Comic.TABLE, comic.withImgDimen(ratio).toContentValues(), Comic.NUM + " = ?", String.valueOf(comic.num()));
+                    Db.update(db, comic.withImgDimen(ratio));
                 }
             });
         } else {
@@ -70,7 +71,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.VH> {
 
         RxView.clicks(holder.favorite)
                 .subscribe(aVoid -> {
-                    db.update(Comic.TABLE, comic.withFavorite(holder.favorite.isChecked()).toContentValues(), Comic.NUM + " = ?", String.valueOf(comic.num()));
+                    Db.update(db, comic.withFavorite(holder.favorite.isChecked()));
                 });
     }
 

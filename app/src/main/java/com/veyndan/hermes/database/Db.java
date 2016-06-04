@@ -19,4 +19,8 @@ public class Db {
         }
     }
 
+    public static void update(BriteDatabase db, Comic comic) {
+        db.update(Comic.TABLE, comic.toContentValues(), Comic.NUM + " = ?", String.valueOf(comic.num()));
+    }
+
 }
