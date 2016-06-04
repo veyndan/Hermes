@@ -11,7 +11,8 @@ import android.widget.ToggleButton;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
-import com.bumptech.glide.request.target.ImageViewTarget;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.SimpleTarget;
 import com.jakewharton.rxbinding.view.RxView;
 import com.squareup.sqlbrite.BriteDatabase;
 import com.veyndan.hermes.R;
@@ -41,19 +42,27 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.VH> {
     }
 
     @Override
-    public void onBindViewHolder(VH holder, int position) {
-        Context context = holder.itemView.getContext();
-        Comic comic = comics.get(position);
+    public void onBindViewHolder(final VH holder, int position) {
+        final Context context = holder.itemView.getContext();
+        final Comic comic = comics.get(position);
 
-        Glide.with(context).load(comic.img()).into(new ImageViewTarget<GlideDrawable>(holder.img) {
-            @Override
-            protected void setResource(GlideDrawable resource) {
-                float ratio = (float) resource.getIntrinsicHeight() / resource.getIntrinsicWidth();
-                float height = holder.img.getWidth() * ratio;
-                holder.img.getLayoutParams().height = (int) height;
-                setDrawable(resource);
-            }
-        });
+        if (comic.imgDimen() == 0) {
+            Glide.with(context).load(comic.img()).into(new SimpleTarget<GlideDrawable>() {
+                @Override
+                public void onResourceReady(GlideDrawable resource,
+                                            GlideAnimation<? super GlideDrawable> glideAnimation) {
+                    float ratio = (float) resource.getIntrinsicHeight() / resource.getIntrinsicWidth();
+                    float height = holder.img.getWidth() * ratio;
+                    holder.img.getLayoutParams().height = (int) height;
+                    holder.img.setImageDrawable(resource);
+                    db.update(Comic.TABLE, comic.withImgDimen(ratio).toContentValues(), Comic.NUM + " = ?", String.valueOf(comic.num()));
+                }
+            });
+        } else {
+            float height = holder.img.getWidth() * comic.imgDimen();
+            holder.img.getLayoutParams().height = (int) height;
+            Glide.with(context).load(comic.img()).into(holder.img);
+        }
         holder.title.setText(comic.title());
         holder.num.setText(comic.displayNum());
         holder.alt.setText(comic.alt());

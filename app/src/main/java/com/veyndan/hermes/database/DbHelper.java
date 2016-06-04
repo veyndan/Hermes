@@ -17,6 +17,7 @@ public final class DbHelper extends SQLiteOpenHelper {
             + Comic.NUM + " INTEGER PRIMARY KEY,"
             + Comic.ALT + " TEXT,"
             + Comic.IMG + " TEXT,"
+            + Comic.IMG_DIMEN + " REAL,"
             + Comic.TITLE + " TEXT,"
             + Comic.FAVORITE + " INTEGER"
             + ")";
